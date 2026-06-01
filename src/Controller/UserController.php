@@ -84,7 +84,7 @@ class UserController extends AbstractController
 
         $avatar = $request->files->get('avatar');
 
-        if (empty($avatar)) {
+        if (!$avatar || !$avatar->isValid()) {
             $this->addFlash('error', 'Avatar cannot be empty');
             return $this->redirectToRoute('app_user');
         }
@@ -94,8 +94,19 @@ class UserController extends AbstractController
         if (!file_exists($this->getParameter('avatars_directory'))) {
             mkdir($this->getParameter('avatars_directory'));
         }
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($avatar->getClientMimeType(), $allowedMimeTypes, true)) {
+            $this->addFlash('error', 'Avatar must be a JPG, PNG, or GIF image');
+            return $this->redirectToRoute('app_user');
+        }
 
-        $avatarName = md5(uniqid()) . '.' . $avatar->getClientOriginalExtension();
+        $extension = $avatar->guessExtension();
+        if (!$extension || !in_array($extension, ['jpg', 'jpeg', 'png', 'gif'], true)) {
+            $this->addFlash('error', 'Invalid avatar file extension');
+            return $this->redirectToRoute('app_user');
+        }
+
+        $avatarName = md5(uniqid('', true)) . '.' . $extension;
         $avatar->move($this->getParameter('avatars_directory'), $avatarName);
 
         $user->setAvatar($avatarName);
