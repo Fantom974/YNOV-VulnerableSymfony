@@ -61,10 +61,10 @@ class PostRepository extends ServiceEntityRepository
      */
     public function search(string $query): array|false
     {
-        $rawSql = "SELECT * FROM post WHERE content LIKE '%" . $query . "%' OR title LIKE '%" . $query . "%' ORDER BY date DESC";
+        $sql = "SELECT * FROM post WHERE content LIKE ? OR title LIKE ? ORDER BY date DESC";
+        $like = '%' . $query . '%';
         $conn = $this->getEntityManager()->getConnection();
-        $stmt = $conn->prepare($rawSql);
-        return $stmt->executeQuery([])->fetchAllAssociative();
+        return $conn->executeQuery($sql, [$like, $like])->fetchAllAssociative();
     }
 
     public function countByUser(User $user): int
