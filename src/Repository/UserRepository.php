@@ -71,9 +71,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function getUserLogin(string $email, string $password): false|array
     {
         $hashedPassword = md5($password);
-        $rawSql = "SELECT * FROM user WHERE email = '$email' AND password = '$hashedPassword' LIMIT 1";
+        $sql = "SELECT * FROM user WHERE email = ? AND password = ? LIMIT 1";
         $conn = $this->getEntityManager()->getConnection();
-        $stmt = $conn->prepare($rawSql);
-        return $stmt->executeQuery([])->fetchAssociative();
+        return $conn->executeQuery($sql, [$email, $hashedPassword])->fetchAssociative();
     }
 }
