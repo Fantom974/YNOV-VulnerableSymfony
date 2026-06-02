@@ -88,7 +88,9 @@ class BlogController extends AbstractController
     #[Route('/legal/content', name: 'app_legal_content', methods: ['GET'])]
     public function legalContent(Request $request): Response
     {
-        $contentPath = __DIR__ . '/../../templates/legal/' . $request->get('p');
+        // Strip any directory component from the requested name so the path
+        // cannot be traversed outside of the templates/legal directory.
+        $contentPath = __DIR__ . '/../../templates/legal/' . basename((string) $request->get('p'));
         if (is_dir($contentPath) || !file_exists($contentPath))
             throw $this->createNotFoundException();
 
